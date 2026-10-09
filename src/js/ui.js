@@ -18,7 +18,7 @@ function toast(message, type = 'info') {
   el.className = `toast ${type}`;
   el.textContent = message;
   container.appendChild(el);
-  setTimeout(() => el.remove(), 2800);
+  setTimeout(() => el.remove(), type === 'error' ? 12000 : 2800);
 }
 
 // ===== MODAL =====
@@ -140,3 +140,13 @@ function optionsForPMs(selectedId) {
   }
   return html;
 }
+
+
+// ===== ERREURS : affichées plutôt qu'avalées en silence =====
+function reportError(where, e) {
+  console.error('[Breakers]', where, e);
+  const msg = (e && e.message) ? e.message : String(e);
+  try { toast(`⚠ Erreur (${where}) : ${msg}`, 'error'); } catch (_) { /* tant pis */ }
+}
+window.addEventListener('error', (ev) => reportError('script', ev.error || ev.message));
+window.addEventListener('unhandledrejection', (ev) => reportError('promesse', ev.reason));

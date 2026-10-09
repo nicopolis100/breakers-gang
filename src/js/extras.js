@@ -65,7 +65,7 @@ function collectActiveTimers() {
   }
   for (const x of DB.infractions) {
     if (!x.lastArrestAt) continue;
-    out.push({ label: `Récidive · ${x.type}`, remaining: INFRACTION_COOLDOWN_MS - (now - x.lastArrestAt) });
+    out.push({ label: `Récidive · ${x.type}`, remaining: infractionCooldownMs(x) - (now - x.lastArrestAt) });
   }
   return out.filter(t => t.remaining > 0).sort((a, b) => a.remaining - b.remaining);
 }

@@ -29,8 +29,12 @@ async function dbLoad() {
   }
   if (!Array.isArray(DB.markers)) DB.markers = []; // compat avec une sauvegarde antérieure à l'onglet Carte
   if (!Array.isArray(DB.bornes)) DB.bornes = [];   // compat avec une sauvegarde antérieure à l'onglet Hacking
-  if (!Array.isArray(DB.infractions) || !DB.infractions.length) {
-    DB.infractions = INFRACTION_TYPES.map(t => newInfraction(t)); // compat avec une sauvegarde antérieure à l'onglet Infractions
+  if (!Array.isArray(DB.infractions)) DB.infractions = [];
+  if (!DB.infractionsInit) {
+    // Première ouverture depuis l'ajout des infractions personnalisées : on ne remet les infractions de base qu'une seule fois,
+    // pour que celles que tu supprimes ne reviennent pas au prochain lancement.
+    if (!DB.infractions.length) DB.infractions = INFRACTION_TYPES.map(t => newInfraction(t));
+    DB.infractionsInit = true;
   }
   if (!Array.isArray(DB.hackZones)) DB.hackZones = []; // compat avec une sauvegarde antérieure aux minuteurs de zone
   for (const nom of HACK_ZONE_NAMES) {
@@ -144,7 +148,11 @@ const INFRACTION_TYPES = [
 ];
 
 function newInfraction(def) {
-  return { id: uuid(), type: def.type, icon: def.icon, lastArrestAt: null };
+  return { id: uuid(), type: def.type, icon: def.icon, cooldownMs: INFRACTION_COOLDOWN_MS, notes: '', lastArrestAt: null, notified: true };
+}
+/** Délai de récidive propre à une infraction (4 h par défaut). */
+function infractionCooldownMs(x) {
+  return x && x.cooldownMs > 0 ? x.cooldownMs : INFRACTION_COOLDOWN_MS;
 }
 
 // ===== DONNÉES DE DÉPART =====
@@ -227,7 +235,7 @@ function getDefaultData() {
 
   const infractions = INFRACTION_TYPES.map(t => newInfraction(t));
 
-  return { storages: [], items, recipes, markers: [], bornes: [], infractions, pms: [], pmBasePrices: {}, hackZones: HACK_ZONE_NAMES.map(n => newHackZone(n)), history: [], sales: [], timers: [] };
+  return { storages: [], items, recipes, markers: [], bornes: [], infractions, infractionsInit: true, pms: [], pmBasePrices: {}, hackZones: HACK_ZONE_NAMES.map(n => newHackZone(n)), history: [], sales: [], timers: [] };
 }
 
 
