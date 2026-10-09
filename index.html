@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>BREAKERS — Gestion du Gang</title>
+<link rel="stylesheet" href="src/css/main.css">
+</head>
+<body>
+  <canvas id="matrix"></canvas>
+
+  <div id="titlebar">
+    <div class="brand">
+      <img src="assets/icon.png" class="brand-logo" alt="Breakers">
+      <div>
+        <div class="brand-name">BREAKERS</div>
+        <div class="brand-sub">Gestion du Gang</div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="update-banner" id="updateBanner" style="display:none">
+      <span class="ub-text"></span>
+      <button class="btn btn-primary btn-sm" id="btnBannerInstall" type="button">Redémarrer</button>
+    </div>
+    <div class="save-path" id="savePath"></div>
+    <div class="win-controls">
+      <button class="wbtn wbtn-min" id="btnMin" title="Réduire">&#x2013;</button>
+      <button class="wbtn wbtn-max" id="btnMax" title="Agrandir">&#x25A1;</button>
+      <button class="wbtn wbtn-cls" id="btnClose" title="Fermer">&#x2715;</button>
+    </div>
+  </div>
+
+  <div id="app">
+    <div id="sidebar">
+      <div class="nav-section">Navigation</div>
+      <button class="nav-item" data-page="dashboard"><span class="nav-icon">&#8962;</span> Accueil</button>
+      <button class="nav-item" data-page="storages"><span class="nav-icon">&#128230;</span> Stockages</button>
+      <button class="nav-item" data-page="items"><span class="nav-icon">&#127890;</span> Objets</button>
+      <button class="nav-item" data-page="recipes"><span class="nav-icon">&#128295;</span> Recettes</button>
+      <button class="nav-item" data-page="prices"><span class="nav-icon">&#128181;</span> Prix de revente</button>
+      <button class="nav-item" data-page="hacking"><span class="nav-icon">&#128421;</span> Hacking</button>
+      <button class="nav-item" data-page="infractions"><span class="nav-icon">&#128680;</span> Infractions</button>
+      <button class="nav-item" data-page="pm"><span class="nav-icon">&#129309;</span> PM</button>
+      <button class="nav-item" data-page="bilan"><span class="nav-icon">&#128200;</span> Bilan</button>
+      <button class="nav-item" data-page="history"><span class="nav-icon">&#128220;</span> Historique</button>
+      <button class="nav-item" data-page="map"><span class="nav-icon">&#128506;</span> Carte</button>
+      <button class="nav-item" id="btnPalette" type="button"><span class="nav-icon">&#128269;</span> Recherche <kbd class="kbd">Ctrl+K</kbd></button>
+      <div class="nav-spacer"></div>
+      <div class="timer-panel" id="timerPanel"></div>
+      <div class="nav-version">v1.2 — hacker mode</div>
+    </div>
+
+    <div id="content">
+
+      <section class="page" id="page-dashboard">
+        <div class="page-header">
+          <h1>Tableau de bord</h1>
+          <p>Vue d'ensemble de tes stockages, objets et recettes de craft.</p>
+        </div>
+        <div class="grid-4" id="dashStats"></div>
+        <div class="card" style="margin-top:14px">
+          <div class="card-title">Valeur d'inventaire par catégorie</div>
+          <div id="dashBreakdown"></div>
+        </div>
+        <div class="card" id="dashLowCard" style="margin-top:14px;display:none">
+          <div class="card-title">⚠ Stocks bas</div>
+          <div id="dashLow"></div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="card-title">Mises à jour</div>
+          <div class="toolbar" style="flex-wrap:wrap">
+            <span class="td-mono" id="updateVersion">v?</span>
+            <button class="btn btn-ghost btn-sm" id="btnCheckUpdate" type="button">🔄 Vérifier maintenant</button>
+            <button class="btn btn-primary btn-sm" id="btnInstallUpdate" type="button" style="display:none">⬆ Redémarrer et installer</button>
+            <span class="td-dim" id="updateText"></span>
+          </div>
+          <p class="craft-avail-note">L'appli vérifie seule au lancement puis toutes les 4 h. Une mise à jour téléchargée s'installe aussi à la fermeture. Tes données ne sont jamais touchées.</p>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="card-title">Données &amp; sauvegardes</div>
+          <div class="toolbar" style="flex-wrap:wrap">
+            <button class="btn btn-ghost btn-sm" id="btnExport">⬆ Exporter</button>
+            <button class="btn btn-ghost btn-sm" id="btnImport">⬇ Importer</button>
+            <button class="btn btn-ghost btn-sm" id="btnBackups">📁 Ouvrir les sauvegardes auto</button>
+            <label class="chk-label"><input type="checkbox" id="chkAutostart"> Lancer au démarrage de Windows</label>
+            <label class="chk-label"><input type="checkbox" id="chkMatrix" checked> Effet Matrix en fond</label>
+          </div>
+          <p class="craft-avail-note">Une copie datée de tes données est faite automatiquement à chaque lancement (les 30 dernières sont gardées).</p>
+        </div>
+      </section>
+
+      <section class="page" id="page-storages">
+        <div class="page-header">
+          <h1>Stockages</h1>
+          <p>Tes planques, ton inventaire par catégorie, et ce que tu peux crafter avec ce que tu as sous la main.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Mes stockages</div>
+          <div class="toolbar" style="margin-bottom:12px">
+            <button class="btn btn-primary btn-sm" id="btnAddStorage">+ Nouveau stockage</button>
+          </div>
+          <div class="table-wrap table-wrap-sm">
+            <table>
+              <thead><tr><th>Nom</th><th>Emplacement</th><th>Catégorie</th><th>Notes</th><th></th></tr></thead>
+              <tbody id="storagesBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Inventaire par catégorie</div>
+          <div id="inventoryGrid" class="inventory-grid"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Recettes réalisables avec ton stock actuel</div>
+          <div class="table-wrap table-wrap-sm">
+            <table>
+              <thead><tr><th>Recette</th><th>Catégorie</th><th>Réalisable</th><th>Valeur potentielle</th><th>Coût composants</th><th>Marge</th></tr></thead>
+              <tbody id="craftAvailBody"></tbody>
+            </table>
+          </div>
+          <p class="craft-avail-note">Seules les recettes avec des ingrédients renseignés apparaissent ici (onglet Recettes). Le nom de chaque ingrédient doit correspondre au nom d'un objet dans l'onglet Objets pour être compté. Coût = valeur de revente des composants ; marge = prix de revente de l'objet − coût (par unité).</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Liste de courses de craft</div>
+          <div class="toolbar" style="margin-bottom:12px;flex-wrap:wrap">
+            <select id="shopRecipe" class="filter-select"></select>
+            <label class="inline-label">Quantité à fabriquer</label>
+            <input type="number" id="shopQty" min="1" step="1" value="10" style="width:90px">
+          </div>
+          <div class="table-wrap table-wrap-sm">
+            <table>
+              <thead><tr><th>Composant</th><th>Nécessaire</th><th>En stock</th><th>Manque</th><th>Coût du manque</th></tr></thead>
+              <tbody id="shopBody"></tbody>
+            </table>
+          </div>
+          <p class="craft-avail-note" id="shopSummary"></p>
+        </div>
+      </section>
+
+      <section class="page" id="page-items">
+        <div class="page-header">
+          <h1>Objets</h1>
+          <p>Le catalogue de tout ce que ton perso possède ou peut looter, par activité.</p>
+        </div>
+        <div class="toolbar">
+          <select id="itemsFilterCat" class="filter-select"></select>
+          <input type="text" id="itemsSearch" class="search-input" placeholder="🔍 Rechercher un objet…" autocomplete="off">
+          <div class="spacer"></div>
+          <button class="btn btn-primary" id="btnAddItem">+ Nouvel objet</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Objet</th><th>Catégorie</th><th>Quantité</th><th>Prix revente</th><th>Valeur</th><th>Stockage</th><th></th></tr></thead>
+            <tbody id="itemsBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="page" id="page-recipes">
+        <div class="page-header">
+          <h1>Recettes de craft</h1>
+          <p>Les recettes que ton perso connaît : ingrédients requis et lieu de fabrication.</p>
+        </div>
+        <div class="toolbar">
+          <button class="btn btn-primary" id="btnAddRecipe">+ Nouvelle recette</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Objet produit</th><th>Catégorie</th><th>Lieu de craft</th><th>Ingrédients</th><th></th></tr></thead>
+            <tbody id="recipesBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="page" id="page-prices">
+        <div class="page-header">
+          <h1>Prix de revente</h1>
+          <p>Le prix de rachat de chaque objet implémenté. Clique une valeur pour la modifier.</p>
+        </div>
+        <div class="toolbar">
+          <select id="pricesFilterCat" class="filter-select"></select>
+          <div class="spacer"></div>
+          <div class="cours-box" id="pricesTotalBox">
+            <div class="cours-label">Valeur totale (filtrée)</div>
+            <div class="cours-value" id="pricesTotal">0 $</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Objet</th><th>Catégorie</th><th>Prix de revente</th></tr></thead>
+            <tbody id="pricesBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="page" id="page-hacking">
+        <div class="page-header">
+          <h1>Hacking — Bornes</h1>
+          <p>Toutes les bornes hackables du serveur. Clique "Braqué" pour lancer le minuteur de 30 minutes — une notif sonore te préviendra quand elle sera de nouveau disponible.</p>
+        </div>
+        <div class="card-title" style="margin-bottom:-6px">Zones — délai avant de pouvoir y retourner</div>
+        <div class="borne-grid" id="hackZonesList"></div>
+        <div class="toolbar">
+          <button class="btn btn-primary" id="btnAddBorne">+ Nouvelle borne</button>
+        </div>
+        <div class="borne-grid" id="hackingList"></div>
+      </section>
+
+      <section class="page" id="page-infractions">
+        <div class="page-header">
+          <h1>Infractions</h1>
+          <p>Clique "Arrestation" juste après t'être fait arrêter pour cette infraction — un minuteur de 4h de récidive démarre.</p>
+        </div>
+        <div class="infraction-grid" id="infractionsList"></div>
+      </section>
+
+      <section class="page" id="page-pm">
+        <div class="page-header">
+          <h1>Petites mains (PM)</h1>
+          <p>Tes tarifs de vente en gros, un tarif personnalisé par objet si besoin pour chaque PM, et une calculatrice pour chiffrer une vente en quelques clics.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Tarifs de base</div>
+          <div class="toolbar" style="margin-bottom:12px">
+            <input type="text" id="pmSearch" class="search-input" placeholder="🔍 Rechercher un objet…" autocomplete="off">
+          </div>
+          <div class="table-wrap table-wrap-sm">
+            <table>
+              <thead><tr><th>Objet</th><th>Catégorie</th><th>Tarif de base</th></tr></thead>
+              <tbody id="pmBasePricesBody"></tbody>
+            </table>
+          </div>
+          <p class="craft-avail-note">Par défaut, le tarif est de 50 % du prix de revente de l'objet. Clique une valeur pour la modifier — elle s'applique alors à toutes tes PM.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Mes petites mains</div>
+          <div class="toolbar" style="margin-bottom:12px">
+            <button class="btn btn-primary btn-sm" id="btnAddPm">+ Nouvelle PM</button>
+          </div>
+          <div class="table-wrap table-wrap-sm">
+            <table>
+              <thead><tr><th>Nom</th><th>Notes</th><th>Tarifs perso.</th><th></th></tr></thead>
+              <tbody id="pmsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Calculatrice de vente</div>
+          <div class="field" style="max-width:320px">
+            <label>Vente à</label>
+            <select id="pmCalcSelect"></select>
+          </div>
+          <div class="ingredients-box" id="pmCalcRows"></div>
+          <button class="btn btn-ghost btn-sm" id="btnPmCalcAddRow" type="button">+ Ajouter un objet</button>
+          <div class="pm-calc-total-row">
+            <span>Total de la vente</span>
+            <span class="pm-calc-total-value" id="pmCalcTotal">0 $</span>
+          </div>
+          <div class="toolbar" style="margin-top:12px;justify-content:flex-end">
+            <button class="btn btn-primary" id="btnPmCalcSell" type="button">💵 Valider la vente</button>
+          </div>
+          <p class="craft-avail-note">« Valider la vente » enregistre la vente dans le Bilan et retire les objets vendus de ton stock.</p>
+        </div>
+      </section>
+
+      <section class="page" id="page-bilan">
+        <div class="page-header">
+          <h1>Bilan des ventes</h1>
+          <p>Ce que tu as encaissé auprès de tes PM, par période, par PM et par catégorie.</p>
+        </div>
+        <div class="toolbar"><select id="bilanPeriod" class="filter-select"></select></div>
+        <div class="grid-4" id="bilanStats"></div>
+        <div class="card">
+          <div class="card-title">Par petite main</div>
+          <div class="table-wrap table-wrap-sm"><table>
+            <thead><tr><th>PM</th><th>Ventes</th><th>Total</th></tr></thead>
+            <tbody id="bilanPmBody"></tbody>
+          </table></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Par catégorie</div>
+          <div class="table-wrap table-wrap-sm"><table>
+            <thead><tr><th>Catégorie</th><th>Objets vendus</th><th>Total</th></tr></thead>
+            <tbody id="bilanCatBody"></tbody>
+          </table></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Détail des ventes</div>
+          <div class="table-wrap table-wrap-sm"><table>
+            <thead><tr><th>Date</th><th>PM</th><th>Contenu</th><th>Total</th><th></th></tr></thead>
+            <tbody id="bilanSalesBody"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-history">
+        <div class="page-header">
+          <h1>Historique des mouvements</h1>
+          <p>Chaque changement de stock (craft, vente, ajustement manuel), avec la date — pour retrouver une erreur.</p>
+        </div>
+        <div class="toolbar">
+          <select id="histType" class="filter-select"></select>
+          <input type="text" id="histSearch" class="search-input" placeholder="🔍 Rechercher un objet…" autocomplete="off">
+          <div class="spacer"></div>
+          <button class="btn btn-danger btn-sm" id="btnClearHistory">Vider l'historique</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Type</th><th>Objet</th><th>Variation</th><th>Stock après</th><th>Détail</th></tr></thead>
+            <tbody id="histBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="page" id="page-map">
+        <div class="page-header">
+          <h1>Carte</h1>
+          <p>Clique n'importe où sur la carte pour poser une balise avec une description. Clique une balise existante pour la voir ou la modifier.</p>
+        </div>
+        <div class="map-toolbar">
+          <div class="map-hint">&#128204; Clique sur la carte pour ajouter une balise</div>
+          <div class="spacer"></div>
+          <select id="mapFilterCat" class="filter-select"></select>
+          <button class="btn btn-icon btn-ghost" id="mapZoomOut" title="Zoom arrière">−</button>
+          <div class="map-zoom-label" id="mapZoomLabel">100%</div>
+          <button class="btn btn-icon btn-ghost" id="mapZoomIn" title="Zoom avant">+</button>
+          <button class="btn btn-ghost btn-sm" id="mapZoomReset">Réinitialiser</button>
+        </div>
+        <div class="map-scroll" id="mapScroll">
+          <div class="map-inner" id="mapInner">
+            <img id="mapImage" src="assets/map_full.png" draggable="false" alt="Carte du serveur">
+            <div id="mapMarkers"></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <div id="modal-overlay" class="modal-overlay">
+    <div class="modal" id="modal-box"></div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="src/js/data.js"></script>
+  <script src="src/js/ui.js"></script>
+  <script src="src/js/pages/dashboard.js"></script>
+  <script src="src/js/pages/storages.js"></script>
+  <script src="src/js/pages/craft.js"></script>
+  <script src="src/js/pages/items.js"></script>
+  <script src="src/js/pages/recipes.js"></script>
+  <script src="src/js/pages/prices.js"></script>
+  <script src="src/js/pages/hacking.js"></script>
+  <script src="src/js/pages/infractions.js"></script>
+  <script src="src/js/pages/map.js"></script>
+  <script src="src/js/pages/pm.js"></script>
+  <script src="src/js/pages/history.js"></script>
+  <script src="src/js/pages/sales.js"></script>
+  <script src="src/js/pages/datacard.js"></script>
+  <script src="src/js/extras.js"></script>
+  <script src="src/js/updater.js"></script>
+  <script src="src/js/init.js"></script>
+</body>
+</html>
