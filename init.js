@@ -17,38 +17,31 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // ---- Rendu initial ----
-  renderDashboard();
-  renderStorages();
-  renderInventoryGrid();
-  renderCraftAvailability();
-  renderItems();
-  renderRecipes();
-  renderPrices();
-  renderHacking();
-  renderHackZones();
-  renderInfractions();
-  renderPmBasePrices();
-  renderPMs();
-  initPmCalculator();
-  renderMap();
-  renderHistory();
-  renderBilan();
-  initTimersPage();
-  initShoppingList();
-  initDataCard();
-  document.querySelectorAll('#content table').forEach(enableTableSort);
-  renderTimerPanel();
-  MatrixFx.init();
-  initUpdater();
+  // Chaque étape est isolée : si l'une plante (données inattendues…), les autres et les boutons continuent de fonctionner,
+  // et l'erreur est affichée pour pouvoir être signalée.
+  const steps = [
+    renderDashboard, renderStorages, renderInventoryGrid, renderCraftAvailability, renderItems, renderRecipes,
+    renderPrices, renderHacking, renderHackZones, renderInfractions, renderPmBasePrices, renderPMs,
+    initPmCalculator, renderMap, renderHistory, renderBilan, initTimersPage, initShoppingList, initDataCard,
+    () => document.querySelectorAll('#content table').forEach(enableTableSort),
+    renderTimerPanel, () => MatrixFx.init(), initUpdater,
+  ];
+  for (const fn of steps) {
+    try { fn(); } catch (e) { reportError(`démarrage (${fn.name || 'étape'})`, e); }
+  }
   showPage('dashboard');
 
   // ---- Boutons "+ Nouveau ..." ----
-  document.getElementById('btnAddStorage').onclick = () => openStorageModal(null);
-  document.getElementById('btnAddItem').onclick = () => openItemModal(null);
-  document.getElementById('btnAddRecipe').onclick = () => openRecipeModal(null);
-  document.getElementById('btnAddBorne').onclick = () => openBorneModal(null);
-  document.getElementById('btnAddInfraction').onclick = () => openInfractionModal(null);
-  document.getElementById('btnAddPm').onclick = () => openPmModal(null);
+  const wire = (id, fn) => {
+    const el = document.getElementById(id);
+    if (el) el.onclick = () => { try { fn(); } catch (e) { reportError(id, e); } };
+  };
+  wire('btnAddStorage', () => openStorageModal(null));
+  wire('btnAddItem', () => openItemModal(null));
+  wire('btnAddRecipe', () => openRecipeModal(null));
+  wire('btnAddBorne', () => openBorneModal(null));
+  wire('btnAddInfraction', () => openInfractionModal(null));
+  wire('btnAddPm', () => openPmModal(null));
 
   // ---- Grille d'inventaire (Stockages) : quantité modifiée ----
   document.getElementById('inventoryGrid').addEventListener('change', onInventoryQtyChange);
@@ -60,7 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const action = btn.dataset.action;
     const id = btn.dataset.id;
 
-    switch (action) {
+    try { switch (action) {
       case 'edit-storage': openStorageModal(id); break;
       case 'del-storage':  deleteStorage(id); break;
       case 'edit-item':    openItemModal(id); break;
@@ -85,7 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       case 'del-pm':             deletePM(id); break;
       case 'pm-tariffs':         openPmTariffsModal(id); break;
       case 'edit-pm-base-price': editPmBasePriceInline(id, btn); break;
-    }
+    } } catch (err) { reportError(action, err); }
   });
 
   // ---- Annuler la dernière action : bouton + Ctrl+Z (hors champs de saisie) ----
