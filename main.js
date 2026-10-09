@@ -49,7 +49,8 @@ function getDefaultData() {
     hackZones: [],
     history: [],
     sales: [],
-    timers: []
+    timers: [],
+    infractionsInit: false
   };
 }
 
@@ -70,6 +71,7 @@ function normalizeData(raw) {
     history: arr(raw.history, def.history),
     sales: arr(raw.sales, def.sales),
     timers: arr(raw.timers, def.timers),
+    infractionsInit: !!raw.infractionsInit,
   };
 }
 

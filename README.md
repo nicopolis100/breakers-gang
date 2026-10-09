@@ -174,3 +174,6 @@ Voir **MISE-A-JOUR.md** pour la mise en place (compte GitHub gratuit). Code déc
 ## v1.4
 - ↶ **Annuler** (bouton en haut + Ctrl+Z) : annule les 30 dernières actions de stock (craft, vente, modif de quantité, création / modif / suppression d'objet). La pile est vidée à la fermeture de l'appli.
 - ⏱ **Minuteurs** : durée libre (h / min / s) avec préréglages, bip + notification à la fin ; visibles aussi dans le panneau « Timers actifs ».
+
+## v1.5
+- 🚨 **Infractions personnalisées** : ajoute tes propres infractions (nom, icône, délai de récidive en h/min, notes), modifie ou supprime celles de base, et annule un minuteur lancé par erreur.

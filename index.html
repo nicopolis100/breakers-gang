@@ -48,7 +48,7 @@
       <button class="nav-item" id="btnPalette" type="button"><span class="nav-icon">&#128269;</span> Recherche <kbd class="kbd">Ctrl+K</kbd></button>
       <div class="nav-spacer"></div>
       <div class="timer-panel" id="timerPanel"></div>
-      <div class="nav-version">v1.4 — hacker mode</div>
+      <div class="nav-version">v1.5 — hacker mode</div>
     </div>
 
     <div id="content">
@@ -233,7 +233,10 @@
       <section class="page" id="page-infractions">
         <div class="page-header">
           <h1>Infractions</h1>
-          <p>Clique "Arrestation" juste après t'être fait arrêter pour cette infraction — un minuteur de 4h de récidive démarre.</p>
+          <p>Clique "Arrestation" juste après t'être fait arrêter pour cette infraction — le minuteur de récidive démarre (4 h par défaut, réglable pour chaque infraction).</p>
+        </div>
+        <div class="toolbar">
+          <button class="btn btn-primary" id="btnAddInfraction">+ Nouvelle infraction</button>
         </div>
         <div class="infraction-grid" id="infractionsList"></div>
       </section>
