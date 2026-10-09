@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderMap();
   renderHistory();
   renderBilan();
+  initTimersPage();
   initShoppingList();
   initDataCard();
   document.querySelectorAll('#content table').forEach(enableTableSort);
@@ -67,6 +68,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       case 'del-recipe':   deleteRecipe(id); break;
       case 'craft-detail': openCraftDetailModal(id); break;
       case 'del-sale':     deleteSale(id); break;
+      case 'restart-timer': restartTimer(id); break;
+      case 'del-timer':    deleteTimer(id); break;
       case 'edit-price':   editPriceInline(id, btn); break;
       case 'edit-marker':  openMarkerModal(id); break;
       case 'edit-borne':   openBorneModal(id); break;
@@ -81,6 +84,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  // ---- Annuler la dernière action : bouton + Ctrl+Z (hors champs de saisie) ----
+  document.getElementById('btnUndo').onclick = undoLast;
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') {
+      const t = e.target && e.target.tagName;
+      if (t === 'INPUT' || t === 'TEXTAREA' || t === 'SELECT') return;
+      e.preventDefault();
+      undoLast();
+    }
+  });
+  updateUndoButton();
+
   // ---- Recherche globale : Ctrl+K ----
   document.getElementById('btnPalette').onclick = openPalette;
   document.addEventListener('keydown', (e) => {
@@ -94,5 +109,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   tickBornes();
   tickInfractions();
   tickHackZones();
-  setInterval(() => { tickBornes(); tickInfractions(); tickHackZones(); renderTimerPanel(); }, 1000);
+  tickCustomTimers();
+  setInterval(() => { tickBornes(); tickInfractions(); tickHackZones(); tickCustomTimers(); renderTimerPanel(); }, 1000);
 });

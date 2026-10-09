@@ -104,6 +104,7 @@ async function onInventoryQtyChange(e) {
   if (!it) return;
   const val = Math.max(0, parseInt(e.target.value, 10) || 0);
   const before = it.quantite;
+  if (val !== before) pushUndo(`Quantité « ${it.nom} » : ${before} → ${val}`);
   it.quantite = val;
   e.target.value = val;
   logMove(it, val - before, 'ajustement', 'Modifié dans la grille');

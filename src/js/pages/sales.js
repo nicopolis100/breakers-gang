@@ -32,6 +32,7 @@ async function validatePmSale() {
     id: uuid(), ts: Date.now(), pmId: pm.id, pmNom: pm.nom, total,
     lines: lines.map(l => ({ itemId: l.item.id, nom: l.item.nom, categorie: l.item.categorie, qty: l.qty, unit: l.unit }))
   };
+  pushUndo(`Vente à ${pm.nom} (${fmtMoney(total)})`);
   for (const [id, n] of need) {
     const it = findItem(id);
     const before = it.quantite;
@@ -82,6 +83,7 @@ async function deleteSale(id) {
   if (!s) return;
   if (!confirm(`Retirer cette vente de ${fmtMoney(s.total)} du bilan ?\n(Le stock ne sera pas remis — corrige-le à la main si besoin.)`)) return;
   DB.sales = DB.sales.filter(x => x.id !== id);
+  clearUndo(); // les positions mémorisées ne correspondent plus
   await dbSave();
   renderBilan();
   toast('Vente retirée du bilan.', 'success');

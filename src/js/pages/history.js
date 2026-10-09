@@ -11,6 +11,7 @@ function renderHistory() {
     document.getElementById('btnClearHistory').onclick = async () => {
       if (!confirm("Vider tout l'historique des mouvements ? (le stock n'est pas modifié)")) return;
       DB.history = [];
+      clearUndo();
       await dbSave();
       renderHistory();
       toast('Historique vidé.', 'success');

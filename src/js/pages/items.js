@@ -61,6 +61,7 @@ function openItemModal(id) {
   box.querySelector('#btnSave').onclick = async () => {
     const nom = box.querySelector('#f-nom').value.trim();
     if (!nom) { toast("Le nom de l'objet est obligatoire.", 'error'); return; }
+    pushUndo(isNew ? `Création de « ${nom} »` : `Modification de « ${it.nom} »`);
     it.nom = nom;
     it.categorie = box.querySelector('#f-cat').value;
     const qBefore = isNew ? 0 : it.quantite;
@@ -83,6 +84,7 @@ function deleteItem(id) {
   const it = findItem(id);
   if (!it) return;
   if (!confirm(`Supprimer l'objet "${it.nom}" ?`)) return;
+  pushUndo(`Suppression de « ${it.nom} »`);
   DB.items = DB.items.filter(x => x.id !== id);
   delete DB.pmBasePrices[id];
   for (const p of DB.pms) { if (p.customPrices) delete p.customPrices[id]; }

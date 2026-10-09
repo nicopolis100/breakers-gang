@@ -1,6 +1,6 @@
 {
   "name": "breakers-gang",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "BREAKERS — Gestion du Gang : stockages, objets, recettes de craft et prix de revente.",
   "main": "main.js",
   "author": "Peyo Cacotegui",

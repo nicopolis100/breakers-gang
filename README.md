@@ -170,3 +170,7 @@ Interface terminal néon vert (logo Breakers conservé), scanlines, titres faço
 
 ## Mises à jour automatiques (v1.3)
 Voir **MISE-A-JOUR.md** pour la mise en place (compte GitHub gratuit). Code découpé : `src/js/pages/*.js` (un fichier par onglet), `extras.js` (tri, Ctrl+K, timers, Matrix), `updater.js`.
+
+## v1.4
+- ↶ **Annuler** (bouton en haut + Ctrl+Z) : annule les 30 dernières actions de stock (craft, vente, modif de quantité, création / modif / suppression d'objet). La pile est vidée à la fermeture de l'appli.
+- ⏱ **Minuteurs** : durée libre (h / min / s) avec préréglages, bip + notification à la fin ; visibles aussi dans le panneau « Timers actifs ».

@@ -48,7 +48,8 @@ function getDefaultData() {
     pmBasePrices: {},
     hackZones: [],
     history: [],
-    sales: []
+    sales: [],
+    timers: []
   };
 }
 
@@ -68,6 +69,7 @@ function normalizeData(raw) {
     pmBasePrices: (raw.pmBasePrices && typeof raw.pmBasePrices === 'object' && !Array.isArray(raw.pmBasePrices)) ? raw.pmBasePrices : def.pmBasePrices,
     history: arr(raw.history, def.history),
     sales: arr(raw.sales, def.sales),
+    timers: arr(raw.timers, def.timers),
   };
 }
 

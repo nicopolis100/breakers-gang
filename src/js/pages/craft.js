@@ -105,6 +105,7 @@ function openCraftDetailModal(recipeId) {
     for (const { ing, owned } of ings) {
       if (!owned || owned.quantite < ing.quantite * q) { toast('Stock insuffisant pour cette quantité.', 'error'); return; }
     }
+    pushUndo(`Craft ${q}x ${r.nomObjet}`);
     for (const { ing, owned } of ings) {
       owned.quantite -= ing.quantite * q;
       logMove(owned, -ing.quantite * q, 'craft', `Composant de ${q}x ${r.nomObjet}`);

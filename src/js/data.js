@@ -40,6 +40,7 @@ async function dbLoad() {
   if (!DB.pmBasePrices || typeof DB.pmBasePrices !== 'object') DB.pmBasePrices = {};
   if (!Array.isArray(DB.history)) DB.history = []; // compat : historique des mouvements de stock
   if (!Array.isArray(DB.sales)) DB.sales = [];     // compat : ventes aux PM
+  if (!Array.isArray(DB.timers)) DB.timers = [];   // compat : minuteurs libres
   for (const p of DB.pms) { if (!p.customPrices || typeof p.customPrices !== 'object') p.customPrices = {}; }
   return DB;
 }
@@ -226,7 +227,7 @@ function getDefaultData() {
 
   const infractions = INFRACTION_TYPES.map(t => newInfraction(t));
 
-  return { storages: [], items, recipes, markers: [], bornes: [], infractions, pms: [], pmBasePrices: {}, hackZones: HACK_ZONE_NAMES.map(n => newHackZone(n)), history: [], sales: [] };
+  return { storages: [], items, recipes, markers: [], bornes: [], infractions, pms: [], pmBasePrices: {}, hackZones: HACK_ZONE_NAMES.map(n => newHackZone(n)), history: [], sales: [], timers: [] };
 }
 
 
@@ -300,4 +301,54 @@ function computeBilan(sales, periodId, now) {
     }
   }
   return { list, total, units, byPm: Object.values(byPm).sort((a, b) => b.total - a.total), byCat: Object.values(byCat).sort((a, b) => b.total - a.total) };
+}
+
+
+// ===== ANNULER LA DERNIÈRE ACTION =====
+// Avant chaque action qui modifie le stock, on garde une photo de l'état (objets, tarifs PM, tailles de l'historique et des ventes).
+const UNDO_MAX = 30;
+let UNDO = [];
+
+function pushUndo(label) {
+  UNDO.push({
+    label,
+    items: JSON.parse(JSON.stringify(DB.items)),
+    pmBasePrices: Object.assign({}, DB.pmBasePrices),
+    pmCustom: Object.fromEntries(DB.pms.map(p => [p.id, Object.assign({}, p.customPrices || {})])),
+    histLen: DB.history.length,
+    salesLen: DB.sales.length,
+  });
+  if (UNDO.length > UNDO_MAX) UNDO.shift();
+  if (typeof updateUndoButton === 'function') updateUndoButton();
+}
+
+function clearUndo() {
+  UNDO = [];
+  if (typeof updateUndoButton === 'function') updateUndoButton();
+}
+
+/** Restaure la dernière photo et renvoie son libellé (ou null s'il n'y a rien à annuler). */
+function applyUndo() {
+  const s = UNDO.pop();
+  if (!s) return null;
+  DB.items = s.items;
+  DB.pmBasePrices = s.pmBasePrices;
+  for (const p of DB.pms) { if (s.pmCustom[p.id]) p.customPrices = s.pmCustom[p.id]; }
+  if (DB.history.length > s.histLen) DB.history.splice(s.histLen);
+  if (DB.sales.length > s.salesLen) DB.sales.splice(s.salesLen);
+  if (typeof updateUndoButton === 'function') updateUndoButton();
+  return s.label;
+}
+
+// ===== MINUTEURS LIBRES =====
+function newCustomTimer(nom, durationMs) {
+  return { id: uuid(), nom: nom || 'Minuteur', durationMs, startAt: Date.now(), notified: false };
+}
+function customTimerRemaining(t) {
+  return t.startAt ? t.durationMs - (Date.now() - t.startAt) : 0;
+}
+function fmtDuration(ms) {
+  const total = Math.round(ms / 1000);
+  const h = Math.floor(total / 3600), m = Math.floor((total % 3600) / 60), s = total % 60;
+  return [h ? h + ' h' : '', m ? m + ' min' : '', s ? s + ' s' : ''].filter(Boolean).join(' ') || '0 s';
 }

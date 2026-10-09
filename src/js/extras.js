@@ -60,6 +60,9 @@ function collectActiveTimers() {
     if (!z.lastAt) continue;
     out.push({ label: z.nom, remaining: HACK_COOLDOWN_MS - (now - z.lastAt) });
   }
+  for (const t of DB.timers) {
+    out.push({ label: t.nom, remaining: customTimerRemaining(t) });
+  }
   for (const x of DB.infractions) {
     if (!x.lastArrestAt) continue;
     out.push({ label: `Récidive · ${x.type}`, remaining: INFRACTION_COOLDOWN_MS - (now - x.lastArrestAt) });
@@ -88,7 +91,7 @@ function renderTimerPanel() {
 const PAGE_LABELS = [
   ['dashboard', 'Accueil'], ['storages', 'Stockages'], ['items', 'Objets'], ['recipes', 'Recettes'],
   ['prices', 'Prix de revente'], ['hacking', 'Hacking'], ['infractions', 'Infractions'], ['pm', 'PM'],
-  ['bilan', 'Bilan'], ['history', 'Historique'], ['map', 'Carte'],
+  ['timers', 'Minuteurs'], ['bilan', 'Bilan'], ['history', 'Historique'], ['map', 'Carte'],
 ];
 
 function paletteEntries() {
@@ -197,3 +200,29 @@ const MatrixFx = (() => {
   }
   return { init };
 })();
+
+
+// ===================================================================
+// ANNULER LA DERNIÈRE ACTION
+// ===================================================================
+function updateUndoButton() {
+  const b = document.getElementById('btnUndo');
+  if (!b) return;
+  const last = UNDO[UNDO.length - 1];
+  b.disabled = !last;
+  b.title = last ? `Annuler : ${last.label}  (Ctrl+Z)` : 'Rien à annuler';
+  b.textContent = last ? `↶ Annuler (${UNDO.length})` : '↶ Annuler';
+}
+
+function rerenderEverything() {
+  renderDashboard(); renderInventoryGrid(); renderCraftAvailability(); renderItems(); renderPrices();
+  renderPmBasePrices(); renderPMs(); updatePmCalcTotals(); renderHistory(); renderBilan(); renderShoppingList();
+}
+
+async function undoLast() {
+  const label = applyUndo();
+  if (!label) { toast('Rien à annuler.', 'info'); return; }
+  await dbSave();
+  rerenderEverything();
+  toast(`Annulé : ${label}`, 'success');
+}

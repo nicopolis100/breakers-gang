@@ -328,3 +328,6 @@ input[type=checkbox]{appearance:auto;-webkit-appearance:checkbox;width:16px;heig
 
 .update-banner{display:flex;align-items:center;gap:10px;margin-right:12px;padding:3px 6px 3px 12px;border:1px solid var(--purple);color:var(--purple);font-size:12px;font-weight:700;box-shadow:0 0 12px rgba(0,255,156,.4);-webkit-app-region:no-drag;animation:blink-glow 1.6s ease-in-out infinite}
 @keyframes blink-glow{50%{box-shadow:0 0 2px rgba(0,255,156,.2)}}
+
+.undo-btn{margin-right:10px;-webkit-app-region:no-drag}
+.undo-btn:disabled{opacity:.35;cursor:not-allowed}
